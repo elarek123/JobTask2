@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+    app:
+     container_name: app
+     build: ./php
+     networks:
+         - backend
+     ports:
+         - "9000:9000"
+     volumes:
+         - ./..:/var/www
+     working_dir: /var/www
+
+    db:
+     container_name: db
+     image: mysql
+     cap_add:
+         - SYS_NICE
+     networks:
+         - backend
+     environment:
+         MYSQL_DATABASE: app
+         MYSQL_ROOT_PASSWORD: 123
+         MYSQL_USER: dbuser
+         MYSQL_PASSWORD: 123
+     ports:
+         - '3306:3306'
+    nginx:
+     container_name: nginx
+     image: nginx:alpine
+     ports:
+        - "80:80"
+     networks:
+        - backend
+     volumes:
+        - ./..:/var/www
+        - ./nginx/conf.d/:/etc/nginx/conf.d/
+     depends_on:
+        - db
+        - app
+
+networks:
+    backend:
